@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-import urllib
-import urllib2
+import urllib.request, urllib.parse, urllib.error
+import urllib.request, urllib.error, urllib.parse
 try: import simplejson as json
 except ImportError: import json
 import os
 import sys
 import cgi
-import urlparse
+import urllib.parse
 import zipfile
 from distutils.version import LooseVersion
 
@@ -25,44 +25,44 @@ try:
     url = configURL['url']
     id = configURL['id']
     version = configURL['version']
-except IOError, e:
-    print e
+except IOError as e:
+    print(e)
     sys.exit(1)
-except ValueError, e:
-    print e
+except ValueError as e:
+    print(e)
     sys.exit(1)
 
 # show informations
-print '-------- DOWNLOADER --------'
-print '- Fetch URL: ' + url + ' -'
-print '- Fetch ID: ' + id + ' -'
-print '- Fetch VERSION: ' + ('latest' if version is None else version) + ' -'
-print '----------------------------'
+print('-------- DOWNLOADER --------')
+print('- Fetch URL: ' + url + ' -')
+print('- Fetch ID: ' + id + ' -')
+print('- Fetch VERSION: ' + ('latest' if version is None else version) + ' -')
+print('----------------------------')
 
 # get index.json
 try:
-    indexResponse = urllib2.urlopen(url + 'index.json')
+    indexResponse = urllib.request.urlopen(url + 'index.json')
     indexJson = json.loads(indexResponse.read())
-except urllib2.URLError, e:
-    print e
+except urllib.error.URLError as e:
+    print(e)
     sys.exit(1)
-except ValueError, e:
-    print e
+except ValueError as e:
+    print(e)
     sys.exit(1)
 if version is None:
     versions = sorted(indexJson[id], key=LooseVersion, reverse=True)
     version = versions[0]
-    print '- Determined latest version: ' + version + ' -'
+    print('- Determined latest version: ' + version + ' -')
 
 # get id/version.json
 try:
-    idResponse = urllib2.urlopen(url + id + '/' + version + '.json')
+    idResponse = urllib.request.urlopen(url + id + '/' + version + '.json')
     idJson = json.loads(idResponse.read())
-except urllib2.URLError, e:
-    print e
+except urllib.error.URLError as e:
+    print(e)
     sys.exit(1)
-except ValueError, e:
-    print e
+except ValueError as e:
+    print(e)
     sys.exit(1)
 
 # download
@@ -84,18 +84,18 @@ for content in idJson['files']:
     contentUrl = content['from']
 
     # information
-    print '---------------------'
-    print '- name: ' + str(contentName)
-    print '- referer: ' + str(contentReferer)
-    print '- unzip: ' + str(contentUnzip)
-    print '- to: ' + str(contentTo)
-    print '- url: ' + str(contentUrl)
-    print '---------------------'
+    print('---------------------')
+    print('- name: ' + str(contentName))
+    print('- referer: ' + str(contentReferer))
+    print('- unzip: ' + str(contentUnzip))
+    print('- to: ' + str(contentTo))
+    print('- url: ' + str(contentUrl))
+    print('---------------------')
 
     # download
-    print '- Downloading ' + contentName + ' ...'
+    print('- Downloading ' + contentName + ' ...')
 
-    contentRequest = urllib2.Request(contentUrl)
+    contentRequest = urllib.request.Request(contentUrl)
     # set User-Agent (Win Chrome)
     contentRequest.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36')
     # set Referer
@@ -113,13 +113,13 @@ for content in idJson['files']:
             sys.stdout.write(progressLine)
             sys.stdout.flush()
 
-        contentResult = urllib2.urlopen(contentRequest)
+        contentResult = urllib.request.urlopen(contentRequest)
         totalBytes = int(contentResult.info().getheader('Content-Length'))
         if contentResult.info().getheader('Content-Disposition') is not None:
-            contentFilename = urllib.unquote(cgi.parse_header(contentResult.headers.getheader('Content-Disposition'))[1]['filename'])
+            contentFilename = urllib.parse.unquote(cgi.parse_header(contentResult.headers.getheader('Content-Disposition'))[1]['filename'])
         else:
-            contentFilename = urllib.unquote(urlparse.urlparse(contentUrl).path.rsplit('/', 1)[1])
-        print '- Saving to ' + contentPath + os.sep + contentFilename + ' ...'
+            contentFilename = urllib.parse.unquote(urllib.parse.urlparse(contentUrl).path.rsplit('/', 1)[1])
+        print('- Saving to ' + contentPath + os.sep + contentFilename + ' ...')
         bytesSoFar = 0
 
         showProgress(bytesSoFar, totalBytes)
@@ -137,13 +137,13 @@ for content in idJson['files']:
                 contentFile.write(readBytes)
                 showProgress(bytesSoFar, totalBytes)
 
-    except urllib2.HTTPError, e:
-        print e
+    except urllib.error.HTTPError as e:
+        print(e)
 
     if contentUnzip:
-        print '- Unpacking to ' + contentPath + ' ...'
+        print('- Unpacking to ' + contentPath + ' ...')
         try:
             with zipfile.ZipFile(contentPath + os.sep + contentFilename, 'r') as zip_file:
                 zip_file.extractall(path = contentPath)
-        except zipfile.BadZipfile, e:
-            print e
+        except zipfile.BadZipfile as e:
+            print(e)
