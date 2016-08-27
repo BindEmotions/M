@@ -34,9 +34,9 @@ except ValueError as e:
 
 # show informations
 print('-------- DOWNLOADER --------')
-print('- Fetch URL: ' + url + ' -')
-print('- Fetch ID: ' + id + ' -')
-print('- Fetch VERSION: ' + ('latest' if version is None else version) + ' -')
+print('- Fetch URL: ' + url
+print('- Fetch ID: ' + id
+print('- Fetch VERSION: ' + ('latest' if version is None else version)
 print('----------------------------')
 
 # get index.json
@@ -69,7 +69,7 @@ except ValueError as e:
 for content in idJson['files']:
     # assign values
     try:
-        contentTo = content['to']
+        contentTo = str(content['to'])
     except:
         contentTo = None
     try:
@@ -80,8 +80,8 @@ for content in idJson['files']:
         contentReferer = content['referer']
     except:
         contentReferer = None
-    contentName = content['name']
-    contentUrl = content['from']
+    contentName = str(content['name'])
+    contentUrl = str(content['from'])
 
     # information
     print('---------------------')
