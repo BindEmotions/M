@@ -42,7 +42,7 @@ print('----------------------------')
 # get index.json
 try:
     indexResponse = urllib.request.urlopen(url + 'index.json')
-    indexJson = json.loads(indexResponse.read())
+    indexJson = json.loads(indexResponse.read().decode('utf8'))
 except urllib.error.URLError as e:
     print(e)
     sys.exit(1)
@@ -57,7 +57,7 @@ if version is None:
 # get id/version.json
 try:
     idResponse = urllib.request.urlopen(url + id + '/' + version + '.json')
-    idJson = json.loads(idResponse.read())
+    idJson = json.loads(idResponse.read().decode('utf8'))
 except urllib.error.URLError as e:
     print(e)
     sys.exit(1)
@@ -114,9 +114,9 @@ for content in idJson['files']:
             sys.stdout.flush()
 
         contentResult = urllib.request.urlopen(contentRequest)
-        totalBytes = int(contentResult.info().getheader('Content-Length'))
-        if contentResult.info().getheader('Content-Disposition') is not None:
-            contentFilename = urllib.parse.unquote(cgi.parse_header(contentResult.headers.getheader('Content-Disposition'))[1]['filename'])
+        totalBytes = int(contentResult.getheader('Content-Length'))
+        if contentResult.getheader('Content-Disposition') is not None:
+            contentFilename = urllib.parse.unquote(cgi.parse_header(contentResult.getheader('Content-Disposition'))[1]['filename'])
         else:
             contentFilename = urllib.parse.unquote(urllib.parse.urlparse(contentUrl).path.rsplit('/', 1)[1])
         print('- Saving to ' + contentPath + os.sep + contentFilename + ' ...')
