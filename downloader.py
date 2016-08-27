@@ -7,6 +7,7 @@ import os
 import sys
 import cgi
 import urlparse
+import tempfile
 import zipfile
 from distutils.version import LooseVersion
 
@@ -102,6 +103,11 @@ for content in idJson['files']:
     if contentReferer is not None:
         contentRequest.add_header('Referer', contentReferer)
 
+    if contentTo is None:
+        contentPath = path 
+    else:
+        contentPath = path + os.sep + contentTo
+
     try:
         def showProgress(bytesSoFar, totalBytes):
             progressLine = '- %s/%s (%0.2f%%) ...\r' % (bytesSoFar, totalBytes, float(bytesSoFar) / totalBytes * 100)
@@ -109,41 +115,36 @@ for content in idJson['files']:
             sys.stdout.flush()
 
         contentResult = urllib2.urlopen(contentRequest)
-        totalBytes = int(contentResult.info().getheader('Content-Length').strip())
+        totalBytes = int(contentResult.info().getheader('Content-Length'))
+        if contentResult.info().getheader('Content-Disposition') is not None:
+            contentFilename = urllib.unquote(cgi.parse_header(contentResult.headers.getheader('Content-Disposition'))[1]['filename'])
+        else:
+            contentFilename = urllib.unquote(urlparse.urlparse(contentUrl).path.rsplit('/', 1)[1])
+        print '- Saving to ' + contentPath + os.sep + contentFilename + ' ...'
         bytesSoFar = 0
 
         showProgress(bytesSoFar, totalBytes)
 
-        while True:
-            readBytes = contentResult.read(1024 * 100)
-            bytesSoFar += len(readBytes)
+        with open(contentPath + os.sep + contentFilename, 'wb') as contentFile:
+            while True:
+                readBytes = contentResult.read(1024 * 100)
+                bytesSoFar += len(readBytes)
 
-            if not readBytes:
-                sys.stdout.write('\n')
-                break
+                if not readBytes:
+                    sys.stdout.write('\n')
+                    contentResult.close()
+                    break
 
-            showProgress(bytesSoFar, totalBytes)
+                contentFile.write(readBytes)
+                showProgress(bytesSoFar, totalBytes)
 
     except urllib2.HTTPError, e:
         print e
 
-    if contentResult.headers.getheader('Content-Disposition') is not None:
-        contentFilename = urllib.unquote(cgi.parse_header(contentResult.headers.getheader('Content-Disposition'))[1]['filename'])
-    else:
-        contentFilename = urllib.unquote(urlparse.urlparse(contentUrl).path.rsplit('/', 1)[1])
-
-    if contentTo is None:
-        contentPath = path 
-    else:
-        contentPath = path + os.sep + contentTo
-
-    print '- Saving to ' + contentPath + ' ...'
-
-    with open(contentPath + os.sep + contentFilename, 'wb') as contentFile:
-        contentFile.write(contentResult.read())
-
-    contentResult.close()
-
     if contentUnzip:
-        with zipfile.ZipFile(contentPath + os.sep + contentFilename, 'r') as zip_file:
-            zip_file.extractall(path = contentPath)
+        print '- Unpacking to ' + contentPath + ' ...'
+        try:
+            with zipfile.ZipFile(contentPath + os.sep + contentFilename, 'r') as zip_file:
+                zip_file.extractall(path = contentPath)
+        except zipfile.BadZipfile, e:
+            print e
