@@ -69,7 +69,7 @@ except ValueError, e:
 for content in idJson['files']:
     # assign values
     try:
-        contentTo = content['to']
+        contentTo = str(content['to'])
     except:
         contentTo = None
     try:
@@ -80,8 +80,8 @@ for content in idJson['files']:
         contentReferer = content['referer']
     except:
         contentReferer = None
-    contentName = content['name']
-    contentUrl = content['from']
+    contentName = str(content['name'])
+    contentUrl = str(content['from'])
 
     # information
     print '---------------------'
