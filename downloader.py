@@ -106,6 +106,8 @@ for content in idJson['files']:
         contentPath = path 
     else:
         contentPath = path + os.sep + contentTo
+        if not os.path.exists(contentPath):
+            os.makedirs(contentPath)
 
     try:
         def showProgress(bytesSoFar, totalBytes):
