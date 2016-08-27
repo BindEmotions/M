@@ -146,7 +146,7 @@ for content in idJson['files']:
         print '- Unpacking to ' + contentPath + ' ...'
         try:
             with zipfile.ZipFile(contentPath + os.sep + contentFilename, 'r') as zip_file:
-                zip_file.extractall(path = contentPath)
+                zip_file.extractall(contentPath)
             os.remove(contentPath + os.sep + contentFilename)
         except zipfile.BadZipfile, e:
             print e
