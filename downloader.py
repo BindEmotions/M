@@ -6,6 +6,7 @@ except ImportError: import json
 import os
 import sys
 import cgi
+import urlparse
 from distutils.version import LooseVersion
 
 # rendering json
@@ -93,27 +94,48 @@ for content in idJson['files']:
     # download
     print '- Downloading ' + contentName + ' ...'
 
-    if contentReferer is None:
-        requestHeader = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36'
-        }
-    else:
-        requestHeader = {
-            'Referer': contentReferer,
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36'
-        }
-
-    contentRequest = urllib2.Request(contentUrl, None, requestHeader)
+    contentRequest = urllib2.Request(contentUrl)
+    # set User-Agent (Win Chrome)
+    contentRequest.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36')
+    # set Referer
+    if contentReferer is not None:
+        contentRequest.add_header('Referer', contentReferer)
 
     try:
+        def showProgress(bytesSoFar, totalBytes):
+            progressLine = '- %s/%s (%0.2f%%) ...\r' % (bytesSoFar, totalBytes, float(bytesSoFar) / totalBytes * 100)
+            sys.stdout.write(progressLine)
+            sys.stdout.flush()
+
         contentResult = urllib2.urlopen(contentRequest)
+        totalBytes = int(contentResult.info().getheader('Content-Length').strip())
+        bytesSoFar = 0
+
+        showProgress(bytesSoFar, totalBytes)
+
+        while True:
+            readBytes = contentResult.read(1024 * 100)
+            bytesSoFar += len(readBytes)
+
+            if not readBytes:
+                sys.stdout.write('\n')
+                break
+
+            showProgress(bytesSoFar, totalBytes)
+
     except urllib2.HTTPError, e:
         print e
+
+
+#    try:
+#        contentResult = urllib2.urlopen(contentRequest)
+#    except urllib2.HTTPError, e:
+#        print e
 
     if contentResult.headers.getheader('Content-Disposition') is not None:
         contentFilename = urllib.unquote(cgi.parse_header(contentResult.headers.getheader('Content-Disposition'))[1]['filename'])
     else:
-        contentFilename = urllib.unquote(contentUrl.rsplit('/',1)[1].split('?')[0])
+        contentFilename = urllib.unquote(urlparse.urlparse(contentUrl).path.rsplit('/', 1)[1])
 
     if contentTo is None:
         contentPath = path + os.sep + contentFilename
