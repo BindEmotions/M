@@ -19,7 +19,7 @@ path = os.path.dirname(os.path.abspath(__file__))
 
 # load URL
 try:
-    loadConfig = open('url.json', 'r')
+    loadConfig = open(path + os.sep + 'url.json', 'r')
     configURL = json.load(loadConfig)
     loadConfig.close()
     url = configURL['url']
