@@ -7,6 +7,7 @@ import os
 import sys
 import cgi
 import urlparse
+import zipfile
 from distutils.version import LooseVersion
 
 # rendering json
@@ -132,13 +133,17 @@ for content in idJson['files']:
         contentFilename = urllib.unquote(urlparse.urlparse(contentUrl).path.rsplit('/', 1)[1])
 
     if contentTo is None:
-        contentPath = path + os.sep + contentFilename
+        contentPath = path 
     else:
-        contentPath = path + os.sep + contentTo + os.sep + contentFilename
+        contentPath = path + os.sep + contentTo
 
     print '- Saving to ' + contentPath + ' ...'
 
-    with open(contentPath, 'wb') as contentFile:
+    with open(contentPath + os.sep + contentFilename, 'wb') as contentFile:
         contentFile.write(contentResult.read())
 
     contentResult.close()
+
+    if contentUnzip:
+        with zipfile.ZipFile(contentPath + os.sep + contentFilename, 'r') as zip_file:
+            zip_file.extractall(path = contentPath)
