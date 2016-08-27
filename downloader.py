@@ -126,12 +126,6 @@ for content in idJson['files']:
     except urllib2.HTTPError, e:
         print e
 
-
-#    try:
-#        contentResult = urllib2.urlopen(contentRequest)
-#    except urllib2.HTTPError, e:
-#        print e
-
     if contentResult.headers.getheader('Content-Disposition') is not None:
         contentFilename = urllib.unquote(cgi.parse_header(contentResult.headers.getheader('Content-Disposition'))[1]['filename'])
     else:
