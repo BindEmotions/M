@@ -2,7 +2,7 @@
 [しと鯖](https://mc.citringo.net/) [modpackage API v1](http://api.citringo.net/citserver/modpackage/v1) のクライアント
 
 ## 動作環境
-- Python 2系
+- Python 3系
 
 ## 使い方
 `url.json`を変更してダウンロード先を変更してから`python downloader.py`するだけ  
