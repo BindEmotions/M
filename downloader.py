@@ -137,3 +137,9 @@ for content in idJson['files']:
         contentPath = path + os.sep + contentTo + os.sep + contentFilename
 
     print '- Saving to ' + contentPath + ' ...'
+
+    contentFile = open(contentPath, 'wb')
+    contentFile.write(contentResult.read())
+    contentFile.close()
+
+    contentResult.close()
