@@ -106,6 +106,8 @@ for content in idJson['files']:
         contentPath = path 
     else:
         contentPath = path + os.sep + contentTo
+        if not os.path.exists(contentPath):
+            os.makedirs(contentPath)
 
     try:
         def showProgress(bytesSoFar, totalBytes):
@@ -144,6 +146,7 @@ for content in idJson['files']:
         print('- Unpacking to ' + contentPath + ' ...')
         try:
             with zipfile.ZipFile(contentPath + os.sep + contentFilename, 'r') as zip_file:
-                zip_file.extractall(path = contentPath)
+                zip_file.extractall(contentPath)
+            os.remove(contentPath + os.sep + contentFilename)
         except zipfile.BadZipfile as e:
             print(e)
