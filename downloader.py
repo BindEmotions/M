@@ -83,13 +83,13 @@ for content in idJson['files']:
     contentUrl = content['from']
 
     # information
-    print '-----------'
-    print '- name: ' + str(contentName) + ' -'
-    print '- referer: ' + str(contentReferer) + ' -'
-    print '- unzip: ' + str(contentUnzip) + ' -'
-    print '- to: ' + str(contentTo) + ' -'
-    print '- url: ' + str(contentUrl) + ' -'
-    print '-----------'
+    print '---------------------'
+    print '- name: ' + str(contentName)
+    print '- referer: ' + str(contentReferer)
+    print '- unzip: ' + str(contentUnzip)
+    print '- to: ' + str(contentTo)
+    print '- url: ' + str(contentUrl)
+    print '---------------------'
 
     # download
     print '- Downloading ' + contentName + ' ...'
@@ -138,8 +138,7 @@ for content in idJson['files']:
 
     print '- Saving to ' + contentPath + ' ...'
 
-    contentFile = open(contentPath, 'wb')
-    contentFile.write(contentResult.read())
-    contentFile.close()
+    with open(contentPath, 'wb') as contentFile:
+        contentFile.write(contentResult.read())
 
     contentResult.close()
