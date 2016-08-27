@@ -7,7 +7,6 @@ import os
 import sys
 import cgi
 import urlparse
-import tempfile
 import zipfile
 from distutils.version import LooseVersion
 
