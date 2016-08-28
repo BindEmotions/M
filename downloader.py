@@ -9,6 +9,7 @@ import cgi
 import urlparse
 import zipfile
 import multiprocessing
+from more_itertools import chunked
 from distutils.version import LooseVersion
 
 # rendering json
@@ -102,7 +103,10 @@ def download(content):
     else:
         contentPath = path + os.sep + contentTo
         if not os.path.exists(contentPath):
-            os.makedirs(contentPath)
+            try:
+                os.makedirs(contentPath)
+            except:
+                print "処理被りモタク"
 
     try:
         contentResult = urllib2.urlopen(contentRequest)
@@ -111,7 +115,7 @@ def download(content):
             contentFilename = urllib.unquote(cgi.parse_header(contentResult.headers.getheader('Content-Disposition'))[1]['filename'])
         else:
             contentFilename = urllib.unquote(urlparse.urlparse(contentUrl).path.rsplit('/', 1)[1])
-        print '- Saving to ' + contentPath + os.sep + contentFilename + ' ...'
+        print '- Saving ' + contentPath + os.sep + contentFilename + ' ...'
         bytesSoFar = 0
 
         showProgress(bytesSoFar, totalBytes)
@@ -142,7 +146,8 @@ def download(content):
             print e
 
 contents = idJson['files']
-contentsLen = len(contents)
 
-pool = multiprocessing.Pool(processes=contentsLen)
-pool.map(download, contents)
+contentsLen = len(contents)
+for content in list(chunked(contents, 3)):
+    pool = multiprocessing.Pool(processes=3)
+    pool.map(download, content)
