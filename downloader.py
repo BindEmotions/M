@@ -34,9 +34,9 @@ except ValueError as e:
 
 # show informations
 print('-------- DOWNLOADER --------')
-print('- Fetch URL: ' + url
-print('- Fetch ID: ' + id
-print('- Fetch VERSION: ' + ('latest' if version is None else version)
+print('- Fetch URL: ' + url)
+print('- Fetch ID: ' + id)
+print('- Fetch VERSION: ' + ('latest' if version is None else version))
 print('----------------------------')
 
 # get index.json
