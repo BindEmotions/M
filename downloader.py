@@ -8,6 +8,7 @@ import sys
 import cgi
 import urlparse
 import zipfile
+import multiprocessing
 from distutils.version import LooseVersion
 
 # rendering json
@@ -66,8 +67,12 @@ except ValueError, e:
     sys.exit(1)
 
 # download
-for content in idJson['files']:
-    # assign values
+def showProgress(bytesSoFar, totalBytes):
+    progressLine = '- %s/%s (%0.2f%%) ...\r' % (bytesSoFar, totalBytes, float(bytesSoFar) / totalBytes * 100)
+    sys.stdout.write(progressLine)
+    sys.stdout.flush()
+
+def download(content):
     try:
         contentTo = str(content['to'])
     except:
@@ -82,16 +87,6 @@ for content in idJson['files']:
         contentReferer = None
     contentName = str(content['name'])
     contentUrl = str(content['from'])
-
-    # information
-    print '---------------------'
-    print '- name: ' + str(contentName)
-    print '- referer: ' + str(contentReferer)
-    print '- unzip: ' + str(contentUnzip)
-    print '- to: ' + str(contentTo)
-    print '- url: ' + str(contentUrl)
-    print '---------------------'
-
     # download
     print '- Downloading ' + contentName + ' ...'
 
@@ -110,11 +105,6 @@ for content in idJson['files']:
             os.makedirs(contentPath)
 
     try:
-        def showProgress(bytesSoFar, totalBytes):
-            progressLine = '- %s/%s (%0.2f%%) ...\r' % (bytesSoFar, totalBytes, float(bytesSoFar) / totalBytes * 100)
-            sys.stdout.write(progressLine)
-            sys.stdout.flush()
-
         contentResult = urllib2.urlopen(contentRequest)
         totalBytes = int(contentResult.info().getheader('Content-Length'))
         if contentResult.info().getheader('Content-Disposition') is not None:
@@ -132,8 +122,8 @@ for content in idJson['files']:
                 bytesSoFar += len(readBytes)
 
                 if not readBytes:
-                    sys.stdout.write('\n')
                     contentResult.close()
+                    sys.stdout.write('\n')
                     break
 
                 contentFile.write(readBytes)
@@ -150,3 +140,9 @@ for content in idJson['files']:
             os.remove(contentPath + os.sep + contentFilename)
         except zipfile.BadZipfile, e:
             print e
+
+contents = idJson['files']
+contentsLen = len(contents)
+
+pool = multiprocessing.Pool(processes=contentsLen)
+pool.map(download, contents)
