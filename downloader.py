@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 import urllib.request, urllib.parse, urllib.error
-import urllib.request, urllib.error, urllib.parse
 try: import simplejson as json
 except ImportError: import json
 import os
 import sys
 import cgi
-import urllib.parse
 import zipfile
 from distutils.version import LooseVersion
 
